@@ -43,6 +43,23 @@ namespace KeithComet.Pooling
             return objectPools[poolKey].GetObjectFromPool();
         }
 
+        public static bool ReturnObjectToPool(GameObject objectToReturn)
+        {
+            string poolKey = objectToReturn.name.Remove(objectToReturn.name.Length - "(Clone)".Length);
+            return ReturnObjectToPool(objectToReturn, poolKey);
+        }
+
+        public static bool ReturnObjectToPool(GameObject objectToReturn, string poolKey)
+        {
+            if (!objectPools.ContainsKey(poolKey))
+            {
+                objectPools.Add(poolKey, createObjectPool(poolKey));
+            }
+            Debug.Log("Returning object to pool: " + poolKey);
+            objectPools[poolKey].DeactivateObject(objectToReturn);
+            return true;
+        }
+
         private static ObjectPool createObjectPool(string poolKey)
         {
             GameObject newPoolObject = new GameObject(poolKey + " Pool", typeof(ObjectPool));
