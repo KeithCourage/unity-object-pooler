@@ -1,0 +1,3 @@
+Place prefab files in this folder and they will be auto-magically added to the PrefabPoolContainer ScriptableObject.
+
+IMPORTANT: Files must be of type ".prefab", and have unique names from one another. (Maybe in the future an auto-incrementing number can be appended to the name on import)
