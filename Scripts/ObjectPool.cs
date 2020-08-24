@@ -22,10 +22,11 @@ namespace KeithComet.Pooling
             activeContainer.SetParent(transform);
             inactiveContainer.SetParent(transform);
 
+            if (objectsToPreload == 0)
+                return;
             for (int i = 0; i < objectsToPreload; i++)
-            {
                 GetObjectFromPool();
-            }
+            DeactivateObjects();
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace KeithComet.Pooling
                 availableObjects.Add(pooledObject);
         }
 
-        public void DeactivateObjects(ObjectPool objectsPool)
+        public void DeactivateObjects()
         {
             for (int i = 0; i < activeObjects.Count; i++)
             {

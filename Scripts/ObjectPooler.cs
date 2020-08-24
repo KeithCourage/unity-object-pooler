@@ -6,6 +6,13 @@ namespace KeithComet.Pooling
 {
     public class ObjectPooler : MonoBehaviour
     {
+        /// <summary>
+        /// If preloadedObjects is greater than 0, on Awake, Object Pools
+        /// for each prefab in the prefab pool will be initialized
+        /// and create that many corresponding (inactive) objects
+        /// </summary>
+        [SerializeField, Range(0, 100)]
+        private int preloadedObjects = 0;
 
         [SerializeField]
         private PrefabPoolContainer prefabPoolContainer;
@@ -20,6 +27,10 @@ namespace KeithComet.Pooling
             objectPoolContainer = transform;
             bool provided = providePrefabPool(prefabPoolContainer.GetDictionary());
             Debug.Log("Prefab pool provided: " + provided);
+            if (preloadedObjects == 0)
+                return;
+            foreach(KeyValuePair<string, GameObject> pair in prefabPool)
+                objectPools.Add(pair.Key, createObjectPool(pair.Key, preloadedObjects));
         }
 
         private static bool providePrefabPool(Dictionary<string, GameObject> providedPool)
@@ -60,12 +71,12 @@ namespace KeithComet.Pooling
             return true;
         }
 
-        private static ObjectPool createObjectPool(string poolKey)
+        private static ObjectPool createObjectPool(string poolKey, int objectsToPreload = 0)
         {
             GameObject newPoolObject = new GameObject(poolKey + " Pool", typeof(ObjectPool));
             newPoolObject.transform.SetParent(objectPoolContainer);
             ObjectPool newPool = newPoolObject.GetComponent<ObjectPool>();
-            newPool.Initialize(prefabPool[poolKey]);
+            newPool.Initialize(prefabPool[poolKey], objectsToPreload);
             return newPool;
         }
     }
