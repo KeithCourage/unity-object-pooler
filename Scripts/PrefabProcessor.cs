@@ -13,16 +13,27 @@ namespace KeithComet.Pooling
     /// </summary>
     public class PrefabProcessor : AssetPostprocessor
 	{
+        private const string PREFAB_FOLDER_NAME = "Prefabs/";
+        private const string SCRIPTS_FOLDER_NAME = "Scripts/";
+
+        private const string PREFAB_FILE_NAME = "PrefabKeys.cs";
         private static string prefabFileHeader = "namespace KeithComet.Pooling" + Environment.NewLine +
-            "{" + Environment.NewLine + "\t" + "public static class PrefabKeys" + System.Environment.NewLine +
+            "{" + Environment.NewLine + "\t" + "public static class PrefabKeys" + Environment.NewLine +
             "\t" + "{";
         private static string prefabFileFooter = Environment.NewLine + "\t" + "}" + Environment.NewLine + "}";
-        private const string PREFAB_FILE_NAME = "PrefabKeys.cs";
+
+        private static PrefabPoolContainer prefabPoolContainer;
+        //location of the folder which contains the PrefabsContainer asset, relative the Assets folder
+        private static string objectPoolerFolderPath;
+        //location of the object pooler prefabs folder/scripts folder, relative the project folder
+        private static string prefabsFolderPath, scriptsFolderPath;
 
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 		{
+            initialize();
+
             //Check if assets were in/from the object pooler prefab folder
-			bool prefabFolderChanged = false;
+            bool prefabFolderChanged = false;
 			foreach (string str in importedAssets)
 			{
 				if (prefabFolderChanged || isAssetInPrefabFolder(str))
@@ -52,31 +63,36 @@ namespace KeithComet.Pooling
 				processPrefabs();
 		}
 
-		private static bool isAssetInPrefabFolder(string pathOfAsset)
+        /// <summary>
+        /// Locates the PrefabsContainer and defines relevant file paths
+        /// </summary>
+        private static void initialize()
+        {
+            objectPoolerFolderPath = AssetDatabase.FindAssets("PrefabsContainer")[0];
+            objectPoolerFolderPath = AssetDatabase.GUIDToAssetPath(objectPoolerFolderPath);
+
+            prefabPoolContainer = (PrefabPoolContainer)AssetDatabase.LoadAssetAtPath
+                (objectPoolerFolderPath, typeof(PrefabPoolContainer));
+
+            objectPoolerFolderPath = objectPoolerFolderPath.Remove(objectPoolerFolderPath.Length - "PrefabsContainer.asset".Length);
+            string projectFolderPath = Application.dataPath.Remove(Application.dataPath.Length - "Assets".Length)
+                + objectPoolerFolderPath;
+            prefabsFolderPath = projectFolderPath + PREFAB_FOLDER_NAME;
+            scriptsFolderPath = projectFolderPath + SCRIPTS_FOLDER_NAME;
+        }
+
+        private static bool isAssetInPrefabFolder(string pathOfAsset)
 		{
-			string lowerCaseAssetPath = pathOfAsset.ToLower();
-			if (lowerCaseAssetPath.IndexOf("/unity-object-pooler/prefabs/", System.StringComparison.Ordinal) == -1)
-				return false;
-			return true;
+            //Debug.Log("path of asset: " + pathOfAsset);
+			if (pathOfAsset.Contains(objectPoolerFolderPath + PREFAB_FOLDER_NAME))
+				return true;
+			return false;
 		}
 
 		private static void processPrefabs()
 		{
-			Debug.Log("Processing prefabs");
-            //locate the PrefabPoolContainer and define needed file paths
-            string prefabPoolFilePath = AssetDatabase.FindAssets("PrefabsContainer")[0];
-            prefabPoolFilePath = AssetDatabase.GUIDToAssetPath(prefabPoolFilePath);
-
-            PrefabPoolContainer prefabPoolContainer = (PrefabPoolContainer) AssetDatabase.LoadAssetAtPath
-                (prefabPoolFilePath, typeof(PrefabPoolContainer));
-
-            prefabPoolFilePath = prefabPoolFilePath.Remove(prefabPoolFilePath.Length - "PrefabsContainer.asset".Length);
-            string objectPoolerFolderPath = Application.dataPath;
-            objectPoolerFolderPath = objectPoolerFolderPath.Remove(objectPoolerFolderPath.Length - "Assets".Length);
-            string prefabFolderPath = objectPoolerFolderPath + prefabPoolFilePath + "Prefabs";
-
             //create a dictionary of prefabs with keys based on file name
-            string[] prefabFiles = Directory.GetFiles(prefabFolderPath, "*.prefab", SearchOption.AllDirectories);
+            string[] prefabFiles = Directory.GetFiles(prefabsFolderPath, "*.prefab", SearchOption.AllDirectories);
             Dictionary<string, GameObject> prefabs = new Dictionary<string, GameObject>();
             for (int i = 0; i < prefabFiles.Length; i++)
             {
@@ -93,9 +109,8 @@ namespace KeithComet.Pooling
             /* write file containing static strings representing prefab pool dictionary keys
              * for use when getting prefabs from ObjectPooler
              */
-            string prefabKeyFilePath = prefabPoolFilePath + "Scripts/" + PREFAB_FILE_NAME;
-            writePrefabKeysToFile(objectPoolerFolderPath + prefabKeyFilePath, prefabs);
-            AssetDatabase.ImportAsset(prefabKeyFilePath);
+            writePrefabKeysToFile(scriptsFolderPath + PREFAB_FILE_NAME, prefabs);
+            AssetDatabase.ImportAsset(scriptsFolderPath + PREFAB_FILE_NAME);
 
             Debug.Log("Prefabs Initialized");
         }
