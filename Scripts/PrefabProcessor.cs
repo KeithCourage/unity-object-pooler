@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace KeithComet.Pooling
+namespace KeithCodes.Pooling
 {
     /// <summary>
     /// When a file is moved, added, or deleted from the Assets folder, this checks
@@ -12,7 +12,7 @@ namespace KeithComet.Pooling
     /// attempts to add or remove the prefab(s) to the PrefabPoolContainer scriptableObject
     /// </summary>
     public class PrefabProcessor : AssetPostprocessor
-	{
+    {
         private const string PREFAB_FOLDER_NAME = "Prefabs/";
         private const string SCRIPTS_FOLDER_NAME = "Scripts/";
 
@@ -29,39 +29,39 @@ namespace KeithComet.Pooling
         private static string prefabsFolderPath, scriptsFolderPath;
 
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-		{
+        {
             initialize();
 
             //Check if assets were in/from the object pooler prefab folder
             bool prefabFolderChanged = false;
-			foreach (string str in importedAssets)
-			{
-				if (prefabFolderChanged || isAssetInPrefabFolder(str))
-				{
-					prefabFolderChanged = true;
-					break;
-				}
-			}
-			foreach (string str in deletedAssets)
-			{
-				if (prefabFolderChanged || isAssetInPrefabFolder(str))
-				{
-					prefabFolderChanged = true;
-					break;
-				}
-			}
-			for (int i = 0; i < movedAssets.Length; i++)
-			{
-				if (prefabFolderChanged || isAssetInPrefabFolder(movedAssets[i]) || isAssetInPrefabFolder(movedFromAssetPaths[i]))
-				{
-					prefabFolderChanged = true;
-					break;
-				}
-			}
+            foreach (string str in importedAssets)
+            {
+                if (prefabFolderChanged || isAssetInPrefabFolder(str))
+                {
+                    prefabFolderChanged = true;
+                    break;
+                }
+            }
+            foreach (string str in deletedAssets)
+            {
+                if (prefabFolderChanged || isAssetInPrefabFolder(str))
+                {
+                    prefabFolderChanged = true;
+                    break;
+                }
+            }
+            for (int i = 0; i < movedAssets.Length; i++)
+            {
+                if (prefabFolderChanged || isAssetInPrefabFolder(movedAssets[i]) || isAssetInPrefabFolder(movedFromAssetPaths[i]))
+                {
+                    prefabFolderChanged = true;
+                    break;
+                }
+            }
 
-			if (prefabFolderChanged)
-				processPrefabs();
-		}
+            if (prefabFolderChanged)
+                processPrefabs();
+        }
 
         /// <summary>
         /// Locates the PrefabsContainer and defines relevant file paths
@@ -82,15 +82,15 @@ namespace KeithComet.Pooling
         }
 
         private static bool isAssetInPrefabFolder(string pathOfAsset)
-		{
+        {
             //Debug.Log("path of asset: " + pathOfAsset);
-			if (pathOfAsset.Contains(objectPoolerFolderPath + PREFAB_FOLDER_NAME))
-				return true;
-			return false;
-		}
+            if (pathOfAsset.Contains(objectPoolerFolderPath + PREFAB_FOLDER_NAME))
+                return true;
+            return false;
+        }
 
-		private static void processPrefabs()
-		{
+        private static void processPrefabs()
+        {
             //create a dictionary of prefabs with keys based on file name
             string[] prefabFiles = Directory.GetFiles(prefabsFolderPath, "*.prefab", SearchOption.AllDirectories);
             Dictionary<string, GameObject> prefabs = new Dictionary<string, GameObject>();
@@ -119,7 +119,7 @@ namespace KeithComet.Pooling
         {
             //create string
             string fileString = prefabFileHeader;
-            foreach(KeyValuePair<string, GameObject> pair in prefabDictionary)
+            foreach (KeyValuePair<string, GameObject> pair in prefabDictionary)
             {
                 fileString += Environment.NewLine + "\t\t" + "public static string " +
                     pair.Key.Replace(" ", "") + " = " + "\"" + pair.Key + "\";";
@@ -129,5 +129,5 @@ namespace KeithComet.Pooling
             //save file
             File.WriteAllText(filePath, fileString);
         }
-	}
+    }
 }

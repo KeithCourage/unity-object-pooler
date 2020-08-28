@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KeithComet.Pooling
+namespace KeithCodes.Pooling
 {
     public class PrefabPoolContainer : ScriptableObject
     {
