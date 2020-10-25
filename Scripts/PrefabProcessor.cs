@@ -17,7 +17,7 @@ namespace KeithCodes.Pooling
         private const string SCRIPTS_FOLDER_NAME = "Scripts/";
 
         private const string PREFAB_FILE_NAME = "PrefabKeys.cs";
-        private static string prefabFileHeader = "namespace KeithComet.Pooling" + Environment.NewLine +
+        private static string prefabFileHeader = "namespace KeithCodes.Pooling" + Environment.NewLine +
             "{" + Environment.NewLine + "\t" + "public static class PrefabKeys" + Environment.NewLine +
             "\t" + "{";
         private static string prefabFileFooter = Environment.NewLine + "\t" + "}" + Environment.NewLine + "}";
