@@ -105,12 +105,14 @@ namespace KeithCodes.Pooling
             }
             //pass dictionary to PrefabPoolContainer
             prefabPoolContainer.Initialize(prefabs);
+			EditorUtility.SetDirty(prefabPoolContainer);
 
             /* write file containing static strings representing prefab pool dictionary keys
              * for use when getting prefabs from ObjectPooler
              */
             writePrefabKeysToFile(scriptsFolderPath + PREFAB_FILE_NAME, prefabs);
             AssetDatabase.ImportAsset(scriptsFolderPath + PREFAB_FILE_NAME);
+			AssetDatabase.SaveAssets();
 
             Debug.Log("Prefabs Initialized");
         }
